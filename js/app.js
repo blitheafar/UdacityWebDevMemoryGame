@@ -6,7 +6,7 @@ var card2 = 'fa-paper-plane-o';
 var card3 = 'fa-anchor';
 var card4 = 'fa-bolt';
 var card5 = 'fa-cube';
-var card6 = 'fa-anchor';
+var card6 = 'fa-bomb';
 var card7 = 'fa-leaf';
 var card8 = 'fa-bicycle';
 
@@ -15,16 +15,11 @@ var openArr = [];
 
 //洗牌后的卡片数组
 var newCardArr = shuffle(cardArr);
+//设置移动计数器
+var moveCount = 0;
+//取得card类对象
+var cardList;
 
-//生成页面
-var _html = '';
-newCardArr.forEach(function(item) {
-  _html += '<li class="card">';
-  _html += '<i class="fa ' + item + '"></i>';
-  _html += '</li>';
-});
-
-document.body.querySelector(".deck").innerHTML = _html;
 
 /*
  * 显示页面上的卡片
@@ -63,8 +58,64 @@ function shuffle(array) {
 
 //监听卡片点击
 window.onload = function() {
-  //取得card类对象
-  var cardList = document.getElementsByClassName("card");
+  //生成页面卡片
+  createCard();
+
+  // Get the modal
+  var modal = document.getElementById('myModal');
+  // When the user clicks anywhere outside of the modal, close it
+  //点击空白区域隐藏对话框
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+
+  //点击刷新按钮
+  document.body.querySelector(".restart").addEventListener("click", function() {
+    createCard();
+    cleanData();
+  });
+
+  //点击再玩一次
+  document.getElementById("rePlay").onclick=function() {
+    createCard();
+    cleanData();
+  };
+};
+
+//生成页面卡片
+function createCard() {
+  var _html = '';
+  newCardArr.forEach(function(item) {
+    _html += '<li class="card">';
+    _html += '<i class="fa ' + item + '"></i>';
+    _html += '</li>';
+  });
+  document.body.querySelector(".deck").innerHTML = _html;
+
+  //给卡片添加点击事件
+  cardClickListener();
+}
+
+//点击重开游戏后的清除数据操作
+function cleanData() {
+  //清楚翻开的卡片数组
+  openArr = [];
+  //清除移动数
+  moveCount = 0;
+  document.getElementsByClassName("moves")[0].innerText = moveCount;
+  //清除星星
+  var _html = "<li><i class='fa fa-star'></i></li><li><i class='fa fa-star'></i></li><li><i class='fa fa-star'></i></li>";
+  document.getElementsByClassName("stars")[0].innerHTML = _html;
+}
+
+
+//卡片点击监听
+function cardClickListener() {
+  //获取卡片对象
+  cardList = document.getElementsByClassName("card");
+
   for (var i = 0; i < cardList.length; i++) {
     cardList[i].onclick = function() {
       //翻转卡片
@@ -74,7 +125,6 @@ window.onload = function() {
 
       //取得翻开的蓝色卡片数
       var cardShowCount = getShowCount();
-      console.log("翻开的卡片数：" + cardShowCount);
 
       if (cardShowCount == 2) {
         //卡片匹配，显示两个卡片
@@ -82,8 +132,9 @@ window.onload = function() {
           this.className = "card match";
           //卡片匹配，不再盖上
           lockCard();
+          //卡片第二次出现
+          addToopenArr(cardPic);
         } else {
-          console.log("盖上卡片");
           //移除翻开卡片数组
           removeCard();
 
@@ -96,11 +147,16 @@ window.onload = function() {
         //卡片第一次出现
         addToopenArr(cardPic);
       }
-      console.log("已翻开的卡片数组:" + openArr);
+
+      //设置移动步数
+      showMoveCount(++moveCount);
+      //设置星星数
+      setStar(openArr.length);
+      //判断是否所有卡片都匹配
+      checkWin(openArr.length);
     };
   }
-
-};
+}
 
 function openCard(card) {
   //添加翻转状态到卡片类
@@ -142,6 +198,42 @@ function hideCard() {
   var showCardList = document.getElementsByClassName('card');
   for (var i = 0; i < showCardList.length; i++) {
     showCardList[i].classList.remove("open", "show");
+  }
+}
+
+//移动步数显示功能
+function showMoveCount(count) {
+  document.getElementsByClassName("moves")[0].innerText = count;
+}
+
+//设置星星数
+function setStar(matchCount) {
+  var starElement = document.getElementsByClassName("stars")[0];
+  switch (matchCount) {
+    case 4:
+      starElement.children[0].children[0].className = "fa fa-star";
+      break;
+    case 10:
+      starElement.children[1].children[0].className = "fa fa-star";
+      break;
+    case 16:
+      starElement.children[2].children[0].className = "fa fa-star";
+      break;
+    default:
+      break;
+  }
+}
+
+//游戏结束
+function checkWin(matchCount) {
+  if (matchCount == 16) {
+    //设置记录总结
+    setGameSummary(moveCount,starCount);
+    //打开对话框
+    // Get the modal
+    var modal = document.getElementById('myModal');
+    // Get the <span> element that closes the modal
+    modal.style.display = "block";
   }
 }
 
