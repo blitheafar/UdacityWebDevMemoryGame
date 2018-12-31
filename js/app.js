@@ -84,6 +84,8 @@ window.onload = function() {
 
   //点击再玩一次
   document.getElementById("rePlay").onclick = function() {
+    //隐藏结束对话框
+    modal.style.display = "none";
     cleanData();
     createCard();
   };
