@@ -137,6 +137,12 @@ function cardClickListener() {
         //点击已匹配卡片则无效
         return;
       }
+
+      //阻止同时存在3个翻开的蓝色卡片的情况
+      if (document.getElementsByClassName("show").length==2) {
+        return;
+      }
+
       //翻转卡片
       openCard(this);
       //取得卡片符号
