@@ -132,6 +132,11 @@ function cardClickListener() {
 
   for (var i = 0; i < cardList.length; i++) {
     cardList[i].onclick = function() {
+      //判断是否点击已翻开的蓝卡片
+      if (this.className.indexOf("show")!=-1) {
+        return;
+      }
+
       //判断卡片是否属于匹配成功的
       if (this.className.indexOf("match")!=-1) {
         //点击已匹配卡片则无效
@@ -180,8 +185,6 @@ function cardClickListener() {
       setStarByMove(moveCount);
       //判断是否所有卡片都匹配
       checkWin(openArr.length);
-
-      console.log("已翻开的卡片："+openArr);
     };
   }
 }
