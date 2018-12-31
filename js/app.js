@@ -17,8 +17,13 @@ var openArr = [];
 var newCardArr = shuffle(cardArr);
 //设置移动计数器
 var moveCount = 0;
+//设置计时器,
+var timer;
+//设置计时数，单位秒
+var timeCount = 0;
 //取得card类对象
 var cardList;
+
 
 
 /*
@@ -73,19 +78,22 @@ window.onload = function() {
 
   //点击刷新按钮
   document.body.querySelector(".restart").addEventListener("click", function() {
-    createCard();
     cleanData();
+    createCard();
   });
 
   //点击再玩一次
-  document.getElementById("rePlay").onclick=function() {
-    createCard();
+  document.getElementById("rePlay").onclick = function() {
     cleanData();
+    createCard();
   };
 };
 
 //生成页面卡片
 function createCard() {
+  //启动计时器
+  launchTimer();
+
   var _html = '';
   newCardArr.forEach(function(item) {
     _html += '<li class="card">';
@@ -100,13 +108,17 @@ function createCard() {
 
 //点击重开游戏后的清除数据操作
 function cleanData() {
+  //清除定时器
+  timeCount=0;
+  document.getElementById("timeCost").innerText=timeCount;
+  window.clearInterval(timer);
   //清楚翻开的卡片数组
   openArr = [];
   //清除移动数
   moveCount = 0;
   document.getElementsByClassName("moves")[0].innerText = moveCount;
   //清除星星
-  var _html = "<li><i class='fa fa-star'></i></li><li><i class='fa fa-star'></i></li><li><i class='fa fa-star'></i></li>";
+  var _html = "<li><i class='fa fa-star'></i></li> <li><i class='fa fa-star'></i></li> <li><i class='fa fa-star'></i></li>";
   document.getElementsByClassName("stars")[0].innerHTML = _html;
 }
 
@@ -149,9 +161,10 @@ function cardClickListener() {
       }
 
       //设置移动步数
-      showMoveCount(++moveCount);
-      //设置星星数
-      setStar(openArr.length);
+      moveCount++;
+      showMoveCount(moveCount);
+      //通过移动数设置星星数
+      setStarByMove(moveCount);
       //判断是否所有卡片都匹配
       checkWin(openArr.length);
     };
@@ -188,8 +201,6 @@ function lockCard() {
 
   for (var i = 0; i < showCardArr.length; i++) {
     showCardArr[i].className = "card match";
-    // showCardArr[i].classList.add("match");
-    // showCardArr[i].classList.remove("open","show");
   }
 }
 
@@ -206,18 +217,40 @@ function showMoveCount(count) {
   document.getElementsByClassName("moves")[0].innerText = count;
 }
 
-//设置星星数
-function setStar(matchCount) {
+//通过定时器设置星星数
+function setStarByTimer(timeCount) {
   var starElement = document.getElementsByClassName("stars")[0];
-  switch (matchCount) {
-    case 4:
-      starElement.children[0].children[0].className = "fa fa-star";
+
+  //通过时间设置星级
+  if(timeCount<41){
+    //维持默认3星
+  }else if (timeCount>40&&timeCount<91) {
+    //设为2星
+    starElement.children[2].children[0].className = "fa fa-star-o";
+  }else if (timeCount>90&&timeCount<121) {
+    //设为1星
+    starElement.children[1].children[0].className = "fa fa-star-o";
+  }else {
+    //设为0星
+    starElement.children[0].children[0].className = "fa fa-star-o";
+  }
+}
+
+//通过操作数设置星级
+function setStarByMove(moveCount) {
+  var starElement = document.getElementsByClassName("stars")[0];
+  switch (moveCount) {
+    case 40:
+    //超过40步时，设为2星
+      starElement.children[2].children[0].className = "fa fa-star-o";
       break;
-    case 10:
-      starElement.children[1].children[0].className = "fa fa-star";
+    case 60:
+    //超过60步时，设为1星
+      starElement.children[1].children[0].className = "fa fa-star-o";
       break;
-    case 16:
-      starElement.children[2].children[0].className = "fa fa-star";
+    case 80:
+    //超过80步时，设为0星
+      starElement.children[0].children[0].className = "fa fa-star-o";
       break;
     default:
       break;
@@ -227,8 +260,10 @@ function setStar(matchCount) {
 //游戏结束
 function checkWin(matchCount) {
   if (matchCount == 16) {
+    //清除定时器
+    window.clearInterval(timer);
     //设置记录总结
-    setGameSummary(moveCount,starCount);
+    setGameSummary(moveCount);
     //打开对话框
     // Get the modal
     var modal = document.getElementById('myModal');
@@ -237,7 +272,25 @@ function checkWin(matchCount) {
   }
 }
 
+//计时器
+function launchTimer() {
+  timer=setInterval(function() {
+    timeCount++;
+    //检查用时，设置星级评分
+    setStarByTimer(timeCount);
+    //设置用时
+    document.getElementById("timeCost").innerText=timeCount;
+  }, 1000);
+}
 
-
+//设置结束界面总结数据
+function setGameSummary(moveCount) {
+  //设置步数
+  document.getElementById("moveCount").innerText = moveCount;
+  //设置星星数
+  document.getElementById("starCount").innerText = document.getElementsByClassName("fa-star").length;
+  //设置用时
+  document.getElementById("second").innerText = timeCount;
+}
 
 //document.getElementById("myBtn").onclick=function(){displayDate()};
